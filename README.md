@@ -42,7 +42,7 @@ I designed **Robust Deep RL with a soft actor critic approach in discrete action
 - `train_start:` number of steps when training begins.
 - `reg_train_start`: number of steps when training with SA-Regularizer begins.
 
-### [train.py](http://train.py) (train vanilla SAC)
+### train.py (train vanilla SAC)
 
 ```python
 train.py 
@@ -51,7 +51,7 @@ train.py
   --game=BeamRider(default) # set any atari game environment 
 ```
 
-- example:  `python [train.py](http://train.py)` ,  `python [train.py](http://train.py) —game=Assault`
+- example:  `python train.py` ,  `python [train.py](http://train.py) —game=Assault`
 
 ### robust_train.py (train SA-SAC)
 
