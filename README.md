@@ -41,7 +41,7 @@ I designed **Robust Deep RL with a soft actor critic approach in discrete action
 train.py 
 	--config=config01.json(default)
 	--new=1(default) # set 0 when you load pretrained models
-  --game=BeamRider(default) # set any atari game environment 
+ 	--game=BeamRider(default) # set any atari game environment 
 ```
 
 - example:  `python train.py` ,  `python [train.py](http://train.py) —game=Assault`
@@ -52,7 +52,7 @@ train.py
 robust_train.py 
 	--config=config01.json(default)
 	--new=1(default) # set 0 when you load pretrained models
-  --game=BeamRider(default) # set any atari game environment 
+ 	--game=BeamRider(default) # set any atari game environment 
 ```
 
 - example: `python robust_train.py` , `python robust_[train.py](http://train.py) —game=Assault`
@@ -65,8 +65,8 @@ robust_train.py
 generate_match_video.py
 	--config=config01.json(default)
 	--seed=0(default)
-  --game=BeamRider(default) # set any atari game environment 
-  --random=False(default) # set 1 when you want to test random action.
+  	--game=BeamRider(default) # set any atari game environment 
+  	--random=False(default) # set 1 when you want to test random action.
 ```
 
 - example: `python generate_match_video.py`, `python generate_match_video[.py](http://train.py) —game=Assault --random=1`
@@ -81,8 +81,8 @@ generate_match_video.py
 PGD_generate_video.py
 	--config=config01.json(default)
 	--seed=0(default)
-  --game=BeamRider(default) # set any atari game environment 
-  --steps=10(default) # set PGD attack steps number.
+	--game=BeamRider(default) # set any atari game environment 
+  	--steps=10(default) # set PGD attack steps number.
 ```
 
 - example: `python PGD_generate_video.py`, `python PGD_generate_video[.py](http://train.py) —game=Assault`
@@ -95,8 +95,8 @@ PGD_generate_video.py
 evalulation.py
 	--config=config01.json(default)
 	--seed=0(default)
-  --game=BeamRider(default) # set any atari game environment 
-  --iter=10(default) # set iteration number(tot episode number).
+  	--game=BeamRider(default) # set any atari game environment 
+  	--iter=10(default) # set iteration number(tot episode number).
 ```
 
 - example: `python evalulation.py`, `python evalulation[.py](http://train.py) —game=Assault —iter=30`
@@ -111,8 +111,8 @@ evalulation.py
 pgd_evalulation.py
 	--config=config01.json(default)
 	--seed=0(default)
-  --game=BeamRider(default) # set any atari game environment 
-  --iter=10(default) # set iteration number(tot episode number).
+  	--game=BeamRider(default) # set any atari game environment 
+  	--iter=10(default) # set iteration number(tot episode number).
 ```
 
 - example: `python pgd_evalulation.py`, `python pgd_evalulation[.py](http://train.py) —game=Assault —iter=30`
