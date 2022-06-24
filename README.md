@@ -26,11 +26,6 @@ In our work,  we need to solve a minimax problem: **minimizing the policy loss f
 
 I designed **Robust Deep RL with a soft actor critic approach in discrete action space**. I tested **SA-SAC** in a several **atari gym** environments.
 
-# Results
-
-![Untitled 1](https://user-images.githubusercontent.com/80669616/175530312-7bdc026b-2c51-4c41-ac9e-1eb829c41e66.png)
-![Untitled](https://user-images.githubusercontent.com/80669616/175530367-1fb75530-f419-404c-8368-665ff1a3836f.png)
-
 # Train SA-SAC agent
 
 - Make new three directories `saved_models`, `vidoes` and `Logs` .
@@ -121,6 +116,12 @@ pgd_evalulation.py
 ```
 
 - example: `python pgd_evalulation.py`, `python pgd_evalulation[.py](http://train.py) —game=Assault —iter=30`
+
+# Results
+
+![Untitled 1](https://user-images.githubusercontent.com/80669616/175530312-7bdc026b-2c51-4c41-ac9e-1eb829c41e66.png)
+![Untitled](https://user-images.githubusercontent.com/80669616/175530367-1fb75530-f419-404c-8368-665ff1a3836f.png)
+
 
 ### reference
 
