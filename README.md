@@ -1,6 +1,6 @@
 # Robust Soft Actor Critic
 
-I designed new Robust Deep RL with a Soft Actor-Critic approach with adversarial perturbation on state observations. My work is based on SA-MDP, which is proposed by Zhang et al. (2020). For more detailed explanation, please check attached pdf file.
+I designed new Robust Deep RL with a Soft Actor-Critic approach with adversarial perturbation on state observations. My work is based on SA-MDP, which is proposed by Zhang et al. (2020). For more detailed explanation, please check attached pdf file. **[2022 Spring Semester, Personal Project Research _Kyungphil Park](https://github.com/kyungphilDev/Robust-Deep-RL_Soft-Actor-Critic-Approach/blob/master/Robust%20Deep%20Reinforcement%20Learning%20for%20Soft-Actor-Critic%20against%20Adversarial%20Perturbation%20.pdf)
 
 ### SA-MDP(State Adversarial-MDP)
 
