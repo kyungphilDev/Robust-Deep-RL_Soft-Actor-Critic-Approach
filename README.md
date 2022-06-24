@@ -27,8 +27,7 @@ In our work,  we need to solve a minimax problem: **minimizing the policy loss f
 I designed **Robust Deep RL with a soft actor critic approach in discrete action space**. I tested **SA-SAC** in a several **atari gym** environments.
 
 # Train SA-SAC agent
-
-- Make new three directories `saved_models`, `vidoes` and `Logs` .
+At first, make new three directories `saved_models`, `vidoes` and `Logs`.
 - Before you start training, set `n_steps`, `memory_size`, `train_start`, `reg_train_start` … at the `config01.json` file.
 - `n_steps` : total nubmer of steps you want to train.
 - `memory_size`: buffer memory size
