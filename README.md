@@ -4,7 +4,7 @@ I designed new Robust Deep RL with a Soft Actor-Critic approach with adversarial
 
 ### SA-MDP(State Adversarial-MDP)
 
-SA-MDP assumes that the fixed-adversarial attack is the situation of the worst-case with the most minimized Q value following equations, and Zhang et al. (2020) newly define it as a SA-MDP.
+SA-MDP assumes that the fixed-adversarial attack is the situation of the worst-case with the most minimized Q value following equations, and Zhang et al. (2020) newly define it as a SA-MDP. **[Zhang et al. (2020)](https://arxiv.org/abs/2003.08938)
 
 ![1](https://user-images.githubusercontent.com/80669616/175530915-d2a208b0-0452-401b-bea1-40b4d1266b08.jpg)
 
@@ -123,6 +123,5 @@ pgd_evalulation.py
 ![Untitled](https://user-images.githubusercontent.com/80669616/175530367-1fb75530-f419-404c-8368-665ff1a3836f.png)
 
 
-### reference
 
-**[Robust Deep Reinforcement Learning against Adversarial ...**https://arxiv.org › cs](https://arxiv.org/abs/2003.08938)
+
