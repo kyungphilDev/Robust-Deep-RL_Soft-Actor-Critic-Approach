@@ -6,15 +6,15 @@ I designed new Robust Deep RL with a Soft Actor-Critic approach with adversarial
 
 SA-MDP assumes that the fixed-adversarial attack is the situation of the worst-case with the most minimized Q value following equations, and Zhang et al. (2020) newly define it as a SA-MDP.
 
-	$\tilde{V}_{\pi \circ \nu}(s) = \sum\limits_{a\in\nu(s)} \pi(a|\nu(s)) \sum\limits_{s'\in S} p(s'|s,a) \left[ R(s,a,s')+\gamma\tilde{V}_{\pi \circ \nu}(s') \right]$
+$\tilde{V}_{\pi \circ \nu}(s) = \sum\limits_{a\in\nu(s)} \pi(a|\nu(s)) \sum\limits_{s'\in S} p(s'|s,a) \left[ R(s,a,s')+\gamma\tilde{V}_{\pi \circ \nu}(s') \right]$
 
-	$\tilde{Q}_{\pi \circ \nu}(s) = \sum\limits_{s'\in S} p(s'|s,a) \left[R(s,a,s')+\gamma     \sum\limits_{a''\in A}\pi(a'|\nu(s'))) \tilde{Q}_{\pi \circ \nu}(s',a')\right]$
+$\tilde{Q}_{\pi \circ \nu}(s) = \sum\limits_{s'\in S} p(s'|s,a) \left[R(s,a,s')+\gamma     \sum\limits_{a''\in A}\pi(a'|\nu(s'))) \tilde{Q}_{\pi \circ \nu}(s',a')\right]$
 
 $\tilde{V}_{\pi \circ \nu^*}(s) = \min_{\nu}  \tilde{V}_{\pi \circ \nu}(s), 	\tilde{Q}_{\pi \circ \nu^*}(s,a) = \min_{\nu}  \tilde{Q}_{\pi \circ \nu}(s,a)$
 
 ### SA-SAC Regularizer
 
- $R_{SAC}(\theta_{\pi},\bar s_{i}):= \sum_{i}^{}\max_{\bar{s_i}\in B_p(s_t,\epsilon_t)}||\pi_{\theta_\pi}(s_i)-\pi_{\theta_\pi}(\bar{s_i})||_2$
+$R_{SAC}(\theta_{\pi},\bar s_{i}):= \sum_{i}^{}\max_{\bar{s_i}\in B_p(s_t,\epsilon_t)}||\pi_{\theta_\pi}(s_i)-\pi_{\theta_\pi}(\bar{s_i})||_2$
 
 ### SA-SAC
 
@@ -30,9 +30,8 @@ I designed **Robust Deep RL with a soft actor critic approach in discrete action
 
 # Results
 
-![Untitled](Readme%20aadfcebd405747f7838ef4003bc87d05/Untitled.png)
-
-![Untitled](Readme%20aadfcebd405747f7838ef4003bc87d05/Untitled%201.png)
+![Untitled 1](https://user-images.githubusercontent.com/80669616/175530312-7bdc026b-2c51-4c41-ac9e-1eb829c41e66.png)
+![Untitled](https://user-images.githubusercontent.com/80669616/175530367-1fb75530-f419-404c-8368-665ff1a3836f.png)
 
 # Train SA-SAC agent
 
