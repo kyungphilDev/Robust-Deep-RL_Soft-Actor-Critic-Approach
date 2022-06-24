@@ -11,7 +11,8 @@ SA-MDP assumes that the fixed-adversarial attack is the situation of the worst-c
 
 ### SA-SAC Regularizer
 
-![2](https://user-images.githubusercontent.com/80669616/175530884-1fde8fb9-9828-4ef1-a04f-cdb882c32f41.jpg)
+![3](https://user-images.githubusercontent.com/80669616/175531143-cc6c646c-ce36-43c5-a6b8-202b21d9a9a8.jpg)
+
 
 ### SA-SAC
 
@@ -19,7 +20,7 @@ In our work,  we need to solve a minimax problem: **minimizing the policy loss f
 
 - object function
 
-$\nabla_{\theta} \frac{1}{|B|}\sum_{s\in B}^{}(\min_{i=1,2}Q_{\phi_i}(s,\tilde{a}_{\theta}(s))-\alpha \log\pi_\theta(\tilde{a}_{\theta}(s)|s)-\kappa_{SAC}\nabla_{\theta_\pi}\bar{R}_{SAC})$
+![4](https://user-images.githubusercontent.com/80669616/175530884-1fde8fb9-9828-4ef1-a04f-cdb882c32f41.jpg)
 
 # Codes
 
