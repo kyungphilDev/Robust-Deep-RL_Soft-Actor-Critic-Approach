@@ -6,15 +6,11 @@ I designed new Robust Deep RL with a Soft Actor-Critic approach with adversarial
 
 SA-MDP assumes that the fixed-adversarial attack is the situation of the worst-case with the most minimized Q value following equations, and Zhang et al. (2020) newly define it as a SA-MDP.
 
-$\tilde{V}_{\pi \circ \nu}(s) = \sum\limits_{a\in\nu(s)} \pi(a|\nu(s)) \sum\limits_{s'\in S} p(s'|s,a) \left[ R(s,a,s')+\gamma\tilde{V}_{\pi \circ \nu}(s') \right]$
-
-$\tilde{Q}_{\pi \circ \nu}(s) = \sum\limits_{s'\in S} p(s'|s,a) \left[R(s,a,s')+\gamma     \sum\limits_{a''\in A}\pi(a'|\nu(s'))) \tilde{Q}_{\pi \circ \nu}(s',a')\right]$
-
-$\tilde{V}_{\pi \circ \nu^*}(s) = \min_{\nu}  \tilde{V}_{\pi \circ \nu}(s), 	\tilde{Q}_{\pi \circ \nu^*}(s,a) = \min_{\nu}  \tilde{Q}_{\pi \circ \nu}(s,a)$
+![1](https://user-images.githubusercontent.com/80669616/175530884-1fde8fb9-9828-4ef1-a04f-cdb882c32f41.jpg)
 
 ### SA-SAC Regularizer
 
-$R_{SAC}(\theta_{\pi},\bar s_{i}):= \sum_{i}^{}\max_{\bar{s_i}\in B_p(s_t,\epsilon_t)}||\pi_{\theta_\pi}(s_i)-\pi_{\theta_\pi}(\bar{s_i})||_2$
+![2](https://user-images.githubusercontent.com/80669616/175530915-d2a208b0-0452-401b-bea1-40b4d1266b08.jpg)
 
 ### SA-SAC
 
