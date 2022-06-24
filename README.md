@@ -6,11 +6,12 @@ I designed new Robust Deep RL with a Soft Actor-Critic approach with adversarial
 
 SA-MDP assumes that the fixed-adversarial attack is the situation of the worst-case with the most minimized Q value following equations, and Zhang et al. (2020) newly define it as a SA-MDP.
 
-![1](https://user-images.githubusercontent.com/80669616/175530884-1fde8fb9-9828-4ef1-a04f-cdb882c32f41.jpg)
+![1](https://user-images.githubusercontent.com/80669616/175530915-d2a208b0-0452-401b-bea1-40b4d1266b08.jpg)
+
 
 ### SA-SAC Regularizer
 
-![2](https://user-images.githubusercontent.com/80669616/175530915-d2a208b0-0452-401b-bea1-40b4d1266b08.jpg)
+![2](https://user-images.githubusercontent.com/80669616/175530884-1fde8fb9-9828-4ef1-a04f-cdb882c32f41.jpg)
 
 ### SA-SAC
 
