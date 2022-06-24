@@ -17,9 +17,27 @@ import json
 import qnet_agentsSAC_auto
 import subprocess
 import argparse
+# for recording gym reder
+import os
+import matplotlib.pyplot as plt
+import imageio
+from PIL import Image
+import PIL.ImageDraw as ImageDraw
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+from IPython import display
+from tqdm import tqdm
 
 ################
 #Some simple functions
+def _label_with_episode_number(frame, episode_num):
+    im = Image.fromarray(frame)
+    drawer = ImageDraw.Draw(im)
+    if np.mean(im) < 128:
+        text_color = (255,255,255)
+    else:
+        text_color = (0,0,0)
+    drawer.text((im.size[0]/20,im.size[1]/18), f' {episode_num+1}', fill=text_color)
+    return im
 
 def format_index(t):
     if t<10: return "000{}".format(t)
@@ -38,20 +56,22 @@ def generate_video(configId,seed):
 
 
 ###############
-
 parser = argparse.ArgumentParser(description='Create video of a Space Invaders match played by a trained SAC agent')
 parser.add_argument('--config', help="Json file with all the metaparameters. See config01.json as an example.", type=str, default="config01.json",dest="config_file")
 parser.add_argument('--seed', help="Seed of random number generator", type=int, default=0,dest="seed")
+parser.add_argument('--game', type=str, default="BeamRider", dest="game")
+parser.add_argument('--random', type=int, default=False, dest="random_mode")
 
 args = parser.parse_args()
-
-
 ############
 
 #PARAMS
 print("reading parameters...")
 config_file = args.config_file
 seed = args.seed
+game = args.game
+random_mode = bool(args.random_mode)
+
 config = json.load(open(config_file))
 #Id
 configId = config["configId"]
@@ -82,8 +102,9 @@ t_tot_cut = config["training_parameters"]["t_tot_cut"]
 print("setting up environment and agent...")
 print("playng the match with {0} and seed {1}..".format(configId, seed))
 
-env = gym.make('Qbert-v4')
-env.spec.id = 'Qbert-v4'+"NoFrameskip"
+gameID = game + "-v4"
+env = gym.make(gameID)
+env.spec.id = gameID+"NoFrameskip"
 env = wrappers.AtariPreprocessing(env,grayscale_obs=True,grayscale_newaxis=True,screen_size=screen_size)
 # env = wrappers.AtariPreprocessing(env,grayscale_obs=True,frame_skip=0,grayscale_newaxis=True,screen_size=screen_size)
 
@@ -112,39 +133,16 @@ qnet_agent = QNet_Agent(n_states=n_states,
                         entropy_rate = entropy_rate,
                         alpha = alpha
                        ).cuda()
-# qnet_agent.Q.load_state_dict(torch.load("./saved_models (Qbert-2000K)/Qbert_Q_SAC_auto_{}.model".format(configId)))
-# qnet_agent.target_Q.load_state_dict(torch.load("./saved_models (Qbert-2000K)/Qbert_target_Q_SAC_auto_{}.model".format(configId)))
-# qnet_agent.pi.load_state_dict(torch.load("./saved_models (Qbert-2000K)/Qbert_pi_SAC_auto_{}.model".format(configId)))
+qnet_agent.Q.load_state_dict(torch.load("./saved_models/{}_Q_SAC_auto_{}.model".format(game, configId)))
+qnet_agent.target_Q.load_state_dict(torch.load("./saved_models/{}_target_Q_SAC_auto_{}.model".format(game, configId)))
+qnet_agent.pi.load_state_dict(torch.load("./saved_models/{}_pi_SAC_auto_{}.model".format(game, configId)))
 
 ##################
-
-
 state = env.reset()
 state = np.transpose(state, [2,0,1])
 t=0
 
 ######
-# for recording gym reder
-import os
-import matplotlib.pyplot as plt
-import imageio
-from PIL import Image
-import PIL.ImageDraw as ImageDraw
-os.environ["SDL_VIDEODRIVER"] = "dummy"
-from IPython import display
-
-from tqdm import tqdm
-# for recording gym reder
-def _label_with_episode_number(frame, episode_num):
-    im = Image.fromarray(frame)
-    drawer = ImageDraw.Draw(im)
-    if np.mean(im) < 128:
-        text_color = (255,255,255)
-    else:
-        text_color = (0,0,0)
-    drawer.text((im.size[0]/20,im.size[1]/18), f' {episode_num+1}', fill=text_color)
-    return im
-
 
 frames = []        
 episode_steps = 0
@@ -154,13 +152,12 @@ done = False
 while True:
     try:
         state_cuda = torch.Tensor(state).unsqueeze(0)
-        action = qnet_agent.select_action(state_cuda)
-          # action = qnet_agent.exploit_action(state_cuda)
+        if random_mode:
+          action = qnet_agent.select_action(state_cuda)
+        else:
+          action = qnet_agent.exploit_action(state_cuda)
 
-        # if t % 3 == 0:
-        #   action = qnet_agent.select_action(state_cuda)
-        # else:
-        #   action = qnet_agent.exploit_action(state_cuda)
+        # prevent agent doesn't start at the begining
         if t==0:
           action = 2
         
@@ -192,7 +189,9 @@ while True:
 
 print("Done. Generating Video...")
 # for Recording frame
-fileName = 'SA_SAC_' + "Qbert" +'.gif'
+if random_mode:
+  print("RANDOM MODE!")
+fileName = 'SA_SAC_' + game +'.gif'
 print('dir',os.path.join('./videos/', fileName))
 imageio.mimwrite(os.path.join('./videos/', fileName), frames, fps=10)
 #########################

@@ -19,7 +19,7 @@ os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]= "7"
 
 class QNet_Agent(nn.Module):
-    def __init__(self,n_states, n_actions,gamma=0.99,lr_Q=0.0001,lr_pi=0.0001,lr_alpha=0.0001,tau=0.0001, h_dim=512, h_mu_dim=512, alpha="auto", entropy_rate=0.25):
+    def __init__(self,n_states, n_actions,gamma=0.99,lr_Q=0.0001,lr_pi=0.0001,lr_alpha=0.0001,tau=0.0001, h_dim=512, h_mu_dim=512, alpha="auto", entropy_rate=0.25, reg_start=0):
         super(QNet_Agent,self).__init__()
         
         #The soft twins##########################
@@ -27,7 +27,7 @@ class QNet_Agent(nn.Module):
         self.target_Q = SoftQNeuralNetworkTwin(n_states, n_actions, h_dim=h_dim).cuda()
         #copy value parameters on target
         self.target_Q.load_state_dict(self.Q.state_dict())      
-      
+        self.reg_start = reg_start
     
         #The soft actor##########################
         self.pi = SoftPiNeuralNetwork(n_states, n_actions,h_dim=h_mu_dim).cuda()
@@ -144,7 +144,7 @@ class QNet_Agent(nn.Module):
             
 
             action_reg_loss = 0
-            if cur_step > 2000000:
+            if self.reg_start !=0 and cur_step > self.reg_start:
               scaled_robust_eps = 0.0392
               robust_beta = self.beta_by_frame(cur_step - 300000)
               actor_ub, actor_lb = self.actor_bound(

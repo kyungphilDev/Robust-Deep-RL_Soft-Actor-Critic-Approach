@@ -22,7 +22,28 @@ from abc import ABC
 import torch
 from torch import autograd
 from torch.nn import functional as F
+# for recording gym reder
+import os
+import matplotlib.pyplot as plt
+import imageio
+from PIL import Image
+import PIL.ImageDraw as ImageDraw
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+from IPython import display
 
+from tqdm import tqdm
+# for recording gym reder
+def _label_with_episode_number(frame, episode_num):
+    im = Image.fromarray(frame)
+    drawer = ImageDraw.Draw(im)
+    if np.mean(im) < 128:
+        text_color = (255,255,255)
+    else:
+        text_color = (0,0,0)
+    drawer.text((im.size[0]/20,im.size[1]/18), f'Trained Step: {episode_num+1}', fill=text_color)
+    return im
+
+### PGD Modules
 class Attacker(ABC):
     def __init__(self, model, config):
         """
@@ -85,7 +106,8 @@ class PGD(Attacker):
 parser = argparse.ArgumentParser(description='Create video of a Space Invaders match played by a trained SAC agent')
 parser.add_argument('--config', help="Json file with all the metaparameters. See config01.json as an example.", type=str, default="config01.json",dest="config_file")
 parser.add_argument('--seed', help="Seed of random number generator", type=int, default=0,dest="seed")
-
+parser.add_argument('--game', type=str, default="BeamRider", dest="game")
+parser.add_argument('--steps', type=int, default=10, dest="attack_steps")
 args = parser.parse_args()
 
 
@@ -95,6 +117,8 @@ args = parser.parse_args()
 print("reading parameters...")
 config_file = args.config_file
 seed = args.seed
+game = args.game
+attack_steps = int(args.attack_steps)
 config = json.load(open(config_file))
 #Id
 configId = config["configId"]
@@ -125,10 +149,10 @@ t_tot_cut = config["training_parameters"]["t_tot_cut"]
 print("setting up environment and agent...")
 print("playng the match with {0} and seed {1}..".format(configId, seed))
 
-env = gym.make('Qbert-v4')
-env.spec.id = 'Qbert-v4'+"NoFrameskip"
+gameID = game + "-v4"
+env = gym.make(gameID)
+env.spec.id = gameID+"NoFrameskip"
 env = wrappers.AtariPreprocessing(env,grayscale_obs=True,grayscale_newaxis=True,screen_size=screen_size)
-# env = wrappers.AtariPreprocessing(env,grayscale_obs=True,frame_skip=0,grayscale_newaxis=True,screen_size=screen_size)
 
 seed=random.randint(0, 9)
 
@@ -136,7 +160,6 @@ env.seed(seed)
 torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
-
 
 
 n_states = env.observation_space.shape[0]
@@ -155,39 +178,14 @@ qnet_agent = QNet_Agent(n_states=n_states,
                         entropy_rate = entropy_rate,
                         alpha = alpha
                        ).cuda()
-qnet_agent.Q.load_state_dict(torch.load("./saved_models (Qbert_2M+300K)/Qbert_Q_SAC_auto_{}.model".format(configId)))
-qnet_agent.target_Q.load_state_dict(torch.load("./saved_models (Qbert_2M+300K)/Qbert_target_Q_SAC_auto_{}.model".format(configId)))
-qnet_agent.pi.load_state_dict(torch.load("./saved_models (Qbert_2M+300K)/Qbert_pi_SAC_auto_{}.model".format(configId)))
+qnet_agent.Q.load_state_dict(torch.load("./saved_models/{}_Q_SAC_auto_{}.model".format(game, configId)))
+qnet_agent.target_Q.load_state_dict(torch.load("./saved_models/{}_target_Q_SAC_auto_{}.model".format(game, configId)))
+qnet_agent.pi.load_state_dict(torch.load("./saved_models/{}_pi_SAC_auto_{}.model".format(game, configId)))
 
 ##################
-
-
 state = env.reset()
 state = np.transpose(state, [2,0,1])
 t=0
-
-######
-# for recording gym reder
-import os
-import matplotlib.pyplot as plt
-import imageio
-from PIL import Image
-import PIL.ImageDraw as ImageDraw
-os.environ["SDL_VIDEODRIVER"] = "dummy"
-from IPython import display
-
-from tqdm import tqdm
-# for recording gym reder
-def _label_with_episode_number(frame, episode_num):
-    im = Image.fromarray(frame)
-    drawer = ImageDraw.Draw(im)
-    if np.mean(im) < 128:
-        text_color = (255,255,255)
-    else:
-        text_color = (0,0,0)
-    drawer.text((im.size[0]/20,im.size[1]/18), f'Trained Step: {episode_num+1}', fill=text_color)
-    return im
-
 
 frames = []     
 frames_true = []   
@@ -198,7 +196,7 @@ done = False
 
 attack_config = {
   'eps' : 8.0/255.0,
-  'attack_steps': 10,
+  'attack_steps': attack_steps,
   'attack_lr': 1 / 255.0,
   'random_init': True
 }
@@ -252,8 +250,8 @@ while True:
 
 print("Done. Generating Video...")
 # for Recording frame
-fileName = 'PGD_SA_SAC_' + "Qbert" +'.gif'
-fileName_PGD = 'PGD_TRUE_SA_SAC_' + "Qbert" +'.gif'
+fileName = 'PGD_SA_SAC_' + game +'.gif'
+fileName_PGD = 'PGD_TRUE_SA_SAC_' + game +'.gif'
 print('dir',os.path.join('./videos/', fileName))
 imageio.mimwrite(os.path.join('./videos/', fileName), frames, fps=20)
 imageio.mimwrite(os.path.join('./videos/', fileName_PGD), frames_true, fps=20)

@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import time
 import random
+from logger import Logger
 from memories import ExperienceReplay
 from gym import wrappers
 from gym.wrappers import AtariPreprocessing
@@ -17,23 +18,19 @@ import qnet_agentsSAC_auto
 import json
 import argparse
 from tqdm import tqdm
-from logger import Logger
-
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]= "7"
+# Set GPU ID
+# os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+# os.environ["CUDA_VISIBLE_DEVICES"]= "7"
 
 def moving_average(a, n=3) :
     ret = np.cumsum(a, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
     return ret[n - 1:] / n
 
-
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
 parser = argparse.ArgumentParser(description='Train SAC algorithm on Space Invaders')
 parser.add_argument('--config', help="Json file with all the metaparameters. See config01.json as an example.", type=str, default="config01.json",dest="config_file")
 parser.add_argument('--new', help="If 1 (default) the training starts from scracth, if 0 it starts from an old configuration.", type=int,default=True,dest="new_flag")
+parser.add_argument('--game', type=str, default="BeamRider", dest="game")
 
 args = parser.parse_args()
 
@@ -43,7 +40,7 @@ args = parser.parse_args()
 print("reading parameters...")
 config_file = args.config_file
 new_flag = bool(args.new_flag)
-
+game = args.game
 config = json.load(open(config_file))
 
 #Id
@@ -67,15 +64,21 @@ entropy_rate = config["agent_parameters"]["entropy_rate"]
 
 #training
 n_episodes = int(config["training_parameters"]["n_episodes"])
+n_steps = int(config["training_parameters"]["n_steps"])
 batch_size = config["training_parameters"]["batch_size"]
 t_tot_cut = config["training_parameters"]["t_tot_cut"]
+memory_size = int(config["training_parameters"]["memory_size"])
+train_start = int(config["training_parameters"]["train_start"])
+reg_train_start = int(config["training_parameters"]["reg_train_start"])
 
 ##############
 #SETUP
 print("setting up environment and agent...")
 
-env = gym.make('Qbert-v4')
-env.spec.id = 'Qbert-v4'+"NoFrameskip"
+gameID = game + "-v4"
+env = gym.make(gameID)
+env.spec.id = gameID+"NoFrameskip"
+print("action_meaning:", env.unwrapped.get_action_meanings())
 
 env.seed(seed_value)
 torch.manual_seed(seed_value)
@@ -98,19 +101,21 @@ qnet_agent = QNet_Agent(n_states=n_states,
                         h_dim = h_dim,
                         h_mu_dim = h_mu_dim,
                         entropy_rate = entropy_rate,
-                        alpha = alpha
+                        alpha = alpha,
+                        reg_start = reg_train_start
                        ).cuda()
 
-print(new_flag)
+save_point = 0
 if not new_flag:
     print("reading old configuration from {}.json..".format(configId))
-    qnet_agent.Q.load_state_dict(torch.load("./saved_models/Qbert_Q_SAC_auto_{}.model".format(configId)))
-    qnet_agent.target_Q.load_state_dict(torch.load("./saved_models/Qbert_target_Q_SAC_auto_{}.model".format(configId)))
-    qnet_agent.pi.load_state_dict(torch.load("./saved_models/Qbert_pi_SAC_auto_{}.model".format(configId)))
+    save_point = torch.load("./saved_models/INFO_{}_Q_SAC_auto_{}.model".format(game, configId))
+    qnet_agent.Q.load_state_dict(torch.load("./saved_models/{}_Q_SAC_auto_{}.model".format(game, configId)))
+    qnet_agent.target_Q.load_state_dict(torch.load("./saved_models/{}_target_Q_SAC_auto_{}.model".format(game, configId)))
+    qnet_agent.pi.load_state_dict(torch.load("./saved_models/{}_pi_SAC_auto_{}.model".format(game, configId)))
 
 
-##############
-#TRAIN
+########################################################
+# test pretrained Models
 def test():
     print("test Mode")
     state = env.reset()
@@ -125,7 +130,6 @@ def test():
     while True:
         try:
             state_cuda = torch.Tensor(state).unsqueeze(0)
-            # state_cuda = torch.Tensor(state).to(device).unsqueeze(0)
             action = qnet_agent.exploit_action(state_cuda)
             if step==0:
               action = 2
@@ -152,8 +156,10 @@ def test():
     print('episode Reward: ' + str(episode_return))
     return episode_return
 
+########################################################
+########################################################
 print("start training...")
-rewards_per_episode = []; time_per_episode = []; t_total = 2000000
+rewards_per_episode = []; time_per_episode = []; t_total = save_point
 
 
 time_start = time.time()
@@ -163,13 +169,13 @@ best_episode_reward = -float("inf")
 logger = Logger()
 
 ####
-tot_steps = 2300000
+tot_steps = n_steps
 p_bar = tqdm(total=tot_steps)
 
 for i_episode in range(len(rewards_per_episode),n_episodes):
     logger.on()
-    env = gym.make('Qbert-v4')
-    env.spec.id = 'Qbert-v4'+"NoFrameskip"
+    env = gym.make(gameID)
+    env.spec.id = gameID+"NoFrameskip"
     env = wrappers.AtariPreprocessing(env,grayscale_obs=True,frame_skip=frame_skip,grayscale_newaxis=True,screen_size=screen_size)
 
     try:
@@ -186,21 +192,19 @@ for i_episode in range(len(rewards_per_episode),n_episodes):
             
             t_total+=1
             state_cuda = torch.Tensor(state).unsqueeze(0)
-            # state_cuda = torch.Tensor(state).to(device).unsqueeze(0)
-
             action = qnet_agent.select_action(state_cuda)
             
             new_state, reward, done, info = env.step(action)
             new_state = np.transpose(new_state, [2,0,1])
             memory.push(state, action, new_state, reward, done)
             
-            if memory.__len__()>=2e4 and t%4==0: 
+            if memory.__len__()>=train_start and t%4==0: 
                 batch = memory.sample(batch_size)
                 Q_loss, pi_loss, entropy_loss, action_reg_loss= qnet_agent.optimize(batch, t_total)
                 Q_loss = Q_loss.detach().item()
                 pi_loss =  pi_loss.detach().item()
                 entropy_loss =  entropy_loss.detach().item()
-                if t_total > 900000:
+                if t_total > reg_train_start:
                   action_reg_loss = action_reg_loss.detach().item()
 
             state = new_state
@@ -255,10 +259,11 @@ for i_episode in range(len(rewards_per_episode),n_episodes):
                 plt.close()
 
         if i_episode%10==0:
-            torch.save(qnet_agent.Q.state_dict(), "./saved_models/Qbert_Q_SAC_auto_{}.model".format(configId))
-            torch.save(qnet_agent.target_Q.state_dict(), "./saved_models/Qbert_target_Q_SAC_auto_{}.model".format(configId))
-            torch.save(qnet_agent.pi.state_dict(), "./saved_models/Qbert_pi_SAC_auto_{}.model".format(configId))
-        
+            torch.save(t_total, "./saved_models/INFO_{}_Q_SAC_auto_{}.model".format(game, configId))
+            torch.save(qnet_agent.Q.state_dict(), "./saved_models/{}_Q_SAC_auto_{}.model".format(game, configId))
+            torch.save(qnet_agent.target_Q.state_dict(), "./saved_models/{}_target_Q_SAC_auto_{}.model".format(game, configId))
+            torch.save(qnet_agent.pi.state_dict(), "./saved_models/{}_pi_SAC_auto_{}.model".format(game, configId))
+    
         torch.cuda.empty_cache()
 
             

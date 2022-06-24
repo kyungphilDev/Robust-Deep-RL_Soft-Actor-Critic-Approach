@@ -1,0 +1,7 @@
+__pycache__/
+.ipynb_checkpoints/
+DONE_saved_models/
+Logs/
+saved_models/
+train_figs/
+videos/
