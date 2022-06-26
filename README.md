@@ -125,5 +125,6 @@ pgd_evalulation.py
 
 # References
 
-[1] [Zhang et al. (2020)](https://arxiv.org/abs/2003.08938)
+[1] [Robust Deep Reinforcement Learning against Adversarial Perturbations on State Observations, Zhang et al. (2020)](https://arxiv.org/abs/2003.08938)
+
 [2] [bernomone's github codes](https://github.com/bernomone/SoftActorCritic_ReinforcementLearning)
