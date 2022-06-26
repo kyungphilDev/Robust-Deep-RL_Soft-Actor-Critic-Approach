@@ -123,4 +123,7 @@ pgd_evalulation.py
 ![Untitled](https://user-images.githubusercontent.com/80669616/175530367-1fb75530-f419-404c-8368-665ff1a3836f.png)
 
 
+# References
 
+[1] [Zhang et al. (2020)](https://arxiv.org/abs/2003.08938)
+[2] [bernomone's github codes](https://github.com/bernomone/SoftActorCritic_ReinforcementLearning)
